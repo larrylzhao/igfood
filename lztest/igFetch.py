@@ -20,49 +20,67 @@ max_tag_id = ''
 max_tag_id = 'AQD6tzSPxtdyspOVDOxWSv-b9rYcLo-7KlHlFqkzC2QIXjxQoeUdq0Mc-d9j58Ydp8alxCMRXzqZ89An4jLvpqdv_4pNICjiwuOyAQq03vDAjAXuawf8RMBvq5pTUlK02W-YNGZtJ5fc90nj2wRgj9FfZuTJCzghWUWaahOab8ny8g'
 tagName = "resourcemagazine"
 tagName = "foodphotography"
-count = "200"
-imageInfo = ''
+count = "32"
+imageInfo = '{"data":[\n'
+useCount = 0
 
-i = 0
-#while (int(time) > int(endTime)):
-while (i < 3):
-	i = i + 1
+################ iterate through recent media to look for max_tag_id for certain amount of time back
+#i = 0
+#while (i < 3):
+#	i = i + 1
+while (useCount < 2000):
 
 	queryString = 	'https://api.instagram.com/v1/tags/' + tagName + \
 					'/media/recent?access_token=' + access_token + \
 					'&count=' + count + '&max_tag_id=' + max_tag_id
 
 	r = requests.get(queryString)
-
-	#reqBody = son.loads(r.text)
 	reqBody = r.json()
-
-	index = 0
 	max_tag_id = reqBody['pagination']['next_max_tag_id']
-	link = reqBody['data'][index]['link']
-	tags = str(len(reqBody['data'][index]['tags']))
-	likes = str(reqBody['data'][index]['likes']['count'])
-	time = reqBody['data'][index]['created_time']
-	types = reqBody['data'][index]['type']
-	filters = reqBody['data'][index]['filter']
-	thumbnail = reqBody['data'][index]['images']['thumbnail']['url']
-	lowres = reqBody['data'][index]['images']['low_resolution']['url']
-	user = reqBody['data'][index]['user']['username']
+	#print reqBody['data']
+	for index in range(0,len(reqBody['data'])):
+		link = reqBody['data'][index]['link']
+		tags = len(reqBody['data'][index]['tags'])
+		likes = str(reqBody['data'][index]['likes']['count'])
+		time = reqBody['data'][index]['created_time']
+		types = reqBody['data'][index]['type']
+		filters = reqBody['data'][index]['filter']
+		thumbnail = reqBody['data'][index]['images']['thumbnail']['url']
+		lowres = reqBody['data'][index]['images']['low_resolution']['url']
+		user = reqBody['data'][index]['user']['id']
 
-	imageInfo = '\n max_tag_id: ' + max_tag_id + \
-				'\n link: ' + link + \
-				'\n Time: ' + time + \
-				'\n type: ' + types + \
-				'\n tags: ' + tags + \
-				'\n user: ' + user + \
-				'\n likes: ' + likes + \
-				'\n thumbnail: ' + thumbnail + \
-				'\n lowres: ' + lowres + \
-				'\n'
-	print str(i) + ' ********************************* ' + time
-	print max_tag_id + link
-print imageInfo
+		#print 'tags: ' + str(tags)
+		#check to make sure the media is an image and there are between 4 and 8 tags
+		if (types == 'image') and (10 <= tags) and (tags <= 20):
+			#fetch how many followers the user has
+			queryString = 	'https://api.instagram.com/v1/users/' + user + \
+						'/?access_token=' + access_token
+			r2 = requests.get(queryString)
+			reqBody2 = r2.json()			
+			if (reqBody2['meta']['code'] == 200):
+				followers = reqBody2['data']['counts']['followed_by']
+				#print 'followers: ' + str(followers)
+				if (100 <= followers) and (followers <= 2000):
+					useCount = useCount + 1
+					print useCount
+					imageInfo = imageInfo + \
+								'\t{"link":"' + link + '", '\
+								'"time":"' + time + '", '\
+								'"type":"' + types + '", '\
+								'"tags":"' + str(tags) + '", '\
+								'"user":"' + user + '", '\
+								'"likes":"' + likes + '", '\
+								'"followers":"' + str(followers) + '", '\
+								'"thumbnail":"' + thumbnail + '", '\
+								'"lowres":"' + lowres + '"},\n'\
 
+imageInfo = imageInfo[:-2] + '\n]}'
+#print imageInfo
 
+#with open('imageInfo.json', 'w') as outfile:
+#    json.dump(imageInfo, outfile)
+
+f = open('imageInfo.json', 'w')
+f.write(imageInfo)
 
 
