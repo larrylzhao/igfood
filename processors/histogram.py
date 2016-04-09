@@ -20,21 +20,43 @@ import json
 import numpy
 from pprint import pprint
 import matplotlib.pyplot as plt
+import re
 
-def plotHistogram(histogramtitle="Histogram",input_array, bins=10):
+def plotHistogram(input_array, histogramtitle="Histogram", bins=10):
 	#numpy.histogram(input_array, bins)
 	plt.figure()
 	plt.hist(input_array, bins = 'auto')
 	plt.title(histogramtitle)
 	plt.show()
 
-def plotRGBHistogram(histogramtitle="Histogram", color, input_array, bins=10):
+def plotRGBHistogram(dataList, popularity=False, histogramtitle="RGB Histogram of Overall Dataset",bins=64):
 	#numpy.histogram(input_array, bins)
-
-	
+	redList=[]
+	greenList=[]
+	blueList=[]
+	n=0
+	for row in dataList:
+		print "row[{}] {}".format(n,row)
+		n+=1
+		tempList=row.split()
+		#print "tempList {}".format(tempList[0].strip())
+		intsonly = re.compile('\d+(?:\.\d+)?')
+		print int(intsonly.findall(tempList[1])[0])
+		print tempList
+		redList.append(int(intsonly.findall(tempList[0])[0]))
+		greenList.append(int(intsonly.findall(tempList[1])[0]))
+		blueList.append(int(intsonly.findall(tempList[2])[0]))
 	plt.figure()
-	plt.hist(input_array, bins = '32')
-	plt.title(histogramtitle)
+	#red_histogram = numpy.histogram(array(redList), bins = 256)
+	plt.hist(redList, bins = 64, color = 'red', histtype='step')
+	plt.hist(greenList, bins = 64, color = 'green', histtype='step')
+	plt.hist(blueList, bins = 64, color = 'blue', histtype='step')
+
+	#plt.plot(red_histogram, color = 'red')
+	if popularity:
+		plt.title("Popularity Weighted Data" + histogramtitle)
+	else:
+		plt.title(histogramtitle)
 	plt.show()
 
 def loadCSV(dbPath):
@@ -42,12 +64,12 @@ def loadCSV(dbPath):
 		reader = csv.DictReader(databasefile)
 		tempList = []
 		for row in reader:	
-			print("Appending Values {} {} {}".format(row['colorset_1'], row['colorset_2'], row['colorset_3']))
+			print "Appending Values {} {} {}".format(row['colorset_1'], row['colorset_2'], row['colorset_3'])
 			tempList.append(row['colorset_1'])
 			tempList.append(row['colorset_2'])
 			tempList.append(row['colorset_3'])
-		dataArray = numpy.array(tempList)
-		return dataArray
+		tempList = numpy.array(tempList)
+		return tempList
 
 if __name__ == '__main__':
 	arguments = docopt(__doc__)
@@ -57,6 +79,6 @@ if __name__ == '__main__':
 	if verbose:
 		print(arguments)
 	#input is a CSV for now
-	dataArray = loadCSV(dbPath)
-	plotRGBHistogram(dataArray)
+	dataList = loadCSV(dbPath)
+	plotRGBHistogram(dataList)
 	#histogram(input_path)
