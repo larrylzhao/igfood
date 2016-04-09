@@ -7,18 +7,18 @@ myNgApp.controller('AppCtrl', ['$scope', '$http',
 	$scope.hello = "hello world binding";
 
 	var refresh = function() {
-		$http.get('/contactlist').success(function(response) {
+		$http.get('/igfoodlist').success(function(response) {
 			console.log("i got the data i requested");
-			$scope.contactlist = response;
-			$scope.contact = "";
+			$scope.igfoodlist = response;
+			$scope.post = "";
 		});
 	}
 
 	refresh();
 
-	$scope.addContact = function() {
-		console.log($scope.contact);
-		$http.post('/contactlist', $scope.contact).success(function(response) {
+	$scope.addpost = function() {
+		console.log($scope.post);
+		$http.post('/igfoodlist', $scope.post).success(function(response) {
 			console.log(response);
 			refresh();
 		});
@@ -26,28 +26,28 @@ myNgApp.controller('AppCtrl', ['$scope', '$http',
 
 	$scope.remove = function(id) {
 		console.log(id);
-		$http.delete('/contactlist/' + id).success(function(response) {
+		$http.delete('/igfoodlist/' + id).success(function(response) {
 			refresh();
 		});
 	}
 
 	$scope.edit = function(id) {
 		console.log(id);
-		$http.get('/contactlist/' + id).success(function(response) {
-			$scope.contact = response;
+		$http.get('/igfoodlist/' + id).success(function(response) {
+			$scope.post = response;
 		});
 	}
 
 	$scope.update = function() {
-		console.log($scope.contact._id);
-		$http.put('/contactlist/' + $scope.contact._id, $scope.contact).success(function(response) {
+		console.log($scope.post._id);
+		$http.put('/igfoodlist/' + $scope.post._id, $scope.post).success(function(response) {
 			refresh();
 		})
 
 	};
 
 	$scope.deselect = function() {
-		$scope.contact = "";
+		$scope.post = "";
 	}
 
 }]);
