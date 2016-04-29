@@ -1,0 +1,7 @@
+from docopt import docopt
+from PIL import Image, ImageDraw
+from numpy import array, std
+from scipy.cluster.vq import vq, kmeans, whiten
+import csv
+import ntpath
+import os.path

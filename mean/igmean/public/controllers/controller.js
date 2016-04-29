@@ -4,6 +4,8 @@ myNgApp.controller('AppCtrl', ['$scope', '$http',
 	function($scope, $http) {
 		console.log("hello world controller");
 
+	$scope.hello = "hello world binding";
+
 	var refresh = function() {
 		$http.get('/contactlist').success(function(response) {
 			console.log("i got the data i requested");

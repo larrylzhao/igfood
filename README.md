@@ -8,6 +8,10 @@ pip install Pillow
 pip install -U scikit-image
 pip install 
 pip install docopt
+pip install matplotlib
+
+brew tap homebrew/science
+brew install opencv
 
 A prototype consists of a demo in which all team members participate orally, and of the delivery of a document that expands on the proposal.  This will take about 20 to 30 minutes, with length generally proportional to team size.
 In general, you should consider this as a kind of "sales call", in which your team presents your product to a potential client (the prof and the TA), in order to demonstrate your team's capabilities, and in order to solicit from the client their opinions and suggestions, so that you can improve your product's functionality.
