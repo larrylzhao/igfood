@@ -85,7 +85,6 @@ def plotCSVRGBHistogram(dataList, histogramtitle="RGB Histogram of Overall Datas
 		redList.append(int(intsonly.findall(tempList[0])[0]))
 		greenList.append(int(intsonly.findall(tempList[1])[0]))
 		blueList.append(int(intsonly.findall(tempList[2])[0]))
-	plt.figure()
 	#red_histogram = numpy.histogram(array(redList), bins = 256)
 	plt.hist(redList, bins = 64, color = 'red', histtype='step')
 	plt.hist(greenList, bins = 64, color = 'green', histtype='step')
@@ -137,6 +136,8 @@ if __name__ == '__main__':
 	im = openImage(input_image, verbose) #Open Image
 	pix = im.load() # Get the Pixel Access Object
 	pix_List = imageToList(pix) #Convert Image to Array
-	print "Plotting User Image {}".format(pix_List)
+	#print "Plotting User Image {}".format(pix_List)
 	plotRGBHistogram(pix_List, "RGB Histogram of Image {}".format(input_image))
 	#histogram(input_path)
+	centroid = ([211, 197, 191], [70, 40, 36], [161, 109, 91])
+	plotRGBHistogram(centroid, "RGB Histogram of Centroids of Image {}".format(input_image))
