@@ -14,11 +14,12 @@ app.get('/igfoodlist', function (req, res) {
   db.igfoodlist.find(function (err, docs) {
     console.log(docs);
     res.json(docs);
+
   });
 });
 
 app.post('/igfoodlist', function (req, res) {
-  console.log(req.body);
+  console.log("hellooooooo" + req.body);
   db.igfoodlist.insert(req.body, function(err, doc) {
     res.json(doc);
   });
@@ -26,7 +27,7 @@ app.post('/igfoodlist', function (req, res) {
 
 app.delete('/igfoodlist/:id', function (req, res) {
   var id = req.params.id;
-  console.log(id);
+  //console.log("hellooooooo" + id);
   db.igfoodlist.remove({_id: mongojs.ObjectId(id)}, function (err, doc) {
     res.json(doc);
   });
@@ -40,9 +41,26 @@ app.get('/igfoodlist/:id', function (req, res) {
   });
 });
 
+app.get('/igfoodlist/tn/:tn', function (req, res) {
+  var tn = req.params.tn;
+  //tn = "BDbi1JZPndm";
+  /*db.igfoodlist.findOne({link: "https://www.instagram.com/p/"+tn+"/"}, function (err, doc) {
+    res.json(doc);
+  });*/
+  var fs = require('fs');
+  fs.readFile('../../lztest/thumbnails/'+tn+'.jpg', function(err, data) {
+    //if (err) throw err; // Fail if the file can't be read.
+    //http.createServer(function(req, res) {
+      res.writeHead(200, {'Content-Type': 'image/jpeg'});
+      res.end(data); // Send the file data to the browser.
+    //}).listen(8124);*/
+    console.log('file opened by controller!');
+  });
+});
+
 app.put('/igfoodlist/:id', function (req, res) {
   var id = req.params.id;
-  console.log(req.body.name);
+  //console.log(req.body.name);
   db.igfoodlist.findAndModify({query: {_id: mongojs.ObjectId(id)},
     update: {$set: {name: req.body.name, email: req.body.email, number: req.body.number}},
     new: true}, function (err, doc) {
@@ -50,6 +68,8 @@ app.put('/igfoodlist/:id', function (req, res) {
   });
 
 });
+
+
 
 /*
 //Populate DB with data from imageinfo.json

@@ -42,12 +42,13 @@
 					<td><button class="btn btn-primary" ng-click="addContact()">Add Contact</td>
 					<td><button class="btn btn-info" ng-click="update()">Update</button>&nbsp;&nbsp;<button class="btn btn-info" ng-click="deselect()">Clear</button></td>
 				</tr> -->
-				<tr ng-repeat="post in igfoodlist">
-					<td>{{contact.link}}</td>
-					<!-- <td>{{contact.email}}</td>
-					<td>{{contact.number}}</td>
-					<td><button class="btn btn-danger" ng-click="remove (contact._id)">Remove</button></td>
-					<td><button class="btn btn-warning" ng-click="edit(contact._id)">Edit</button></td> -->
+				<tr ng-repeat="color in colorGroups">
+					<td bgcolor="{{color}}" >
+						<a href="result.html"  style="padding:50px 10px;display:block;color:black"><b>{{$index+1}}<br>{{color}}</b></a>
+					</td>
+				
+					<td ng-repeat="post in thumbnails | limitTo:5">
+						<img src="{{post}}"></td>
 				</tr>
 			</tbody>
 		</table> 
