@@ -1,4 +1,4 @@
-var myNgApp = angular.module('myNgApp', []);
+var myNgApp = angular.module('myNgApp', ['ngAnimate', 'ui.bootstrap']);
 
 myNgApp.controller('AppCtrl', ['$scope', '$http',
 	function($scope, $http) {
@@ -59,7 +59,19 @@ myNgApp.controller('AppCtrl', ['$scope', '$http',
 	}
 
 
+
 	$scope.colorGroups = ["pink","purple","red","orange","yellow","green","cyan","blue","brown","white","grey"];
+	$scope.colors = [];
+	$scope.colors['pink'] = ["pink","lightpink","hotpink","deeppink","palevioletpred","mediumvioletred"];
+	$scope.colors['purple'] = ["Lavender","Thistle","Plum"];
+	$scope.isCollapsed = true;
+
+	$scope.oneAtATime = true;
+	$scope.status = {
+	    isFirstOpen: true,
+	    isFirstDisabled: false
+	};
+	$scope.show = false;
 
 }]);
 
