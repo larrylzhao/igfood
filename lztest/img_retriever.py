@@ -3,7 +3,7 @@ import json
 import re
 
 
-with open('imageInfo.json') as data_file:    
+with open('imageInfo5 copy.json') as data_file:    
     data = json.load(data_file)
 
 for index in range(0,len(data['data'])):
@@ -14,4 +14,4 @@ for index in range(0,len(data['data'])):
 	m = re.search('https://www.instagram.com/p/(.+?)/', link);
 	if m:
 		name = m.group(1)
-		urllib.urlretrieve(img, "./thumbnails/" + name + ".jpg")
+		urllib.urlretrieve(img, "./thumbnails2/" + name + ".jpg")
