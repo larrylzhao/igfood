@@ -30,6 +30,7 @@ class Analysis:
 	"""Actions and Graphing and Generating Results from Input Data"""
 	def __init__(self, filename = "test.png"):
 		self.filename = filename
+		self.original_image = self.openImage(filename)
 
 	def openImage(self, filename="test.png", verbose=False):
 		im = Image.open(filename)
@@ -46,7 +47,7 @@ class Analysis:
 		plt.title(histogramtitle)
 		plt.show()
 
-	def plotRGBHistogram(self, datalist, red=True, green=True , blue=True, histogramtitle="RGB Histogram of Overall Dataset", popularity=False,bins=64):
+	def plotRGBHistogram(self, datalist, red=True, green=True , blue=True, histogramtitle="RGB Histogram of Overall Dataset", popularity=False,bins=255):
 		#numpy.histogram(input_array, bins)
 		redList=[]
 		greenList=[]
@@ -71,13 +72,13 @@ class Analysis:
 	
 		if red:
 			plt.hist(redList, bins = 64, color = 'red', histtype='step')
-			#plt.hist(redList_normalized, bins = 64, color = 'lightpink', histtype='step')
+			plt.hist(redList_normalized, bins = 64, color = 'lightpink', histtype='step')
 		if green:
 			plt.hist(greenList, bins = 64, color = 'green', histtype='step')
-			#plt.hist(greenList_normalized, bins = 64, color = 'lightgreen', histtype='step')
+			plt.hist(greenList_normalized, bins = 64, color = 'lightgreen', histtype='step')
 		if blue:
 			plt.hist(blueList, bins = 64, color = 'blue', histtype='step')
-			#plt.hist(blueList_normalized, bins = 64, color = 'lightblue', histtype='step')
+			plt.hist(blueList_normalized, bins = 64, color = 'lightblue', histtype='step')
 	
 		#plt.plot(red_histogram, color = 'red')
 		if popularity:
@@ -85,6 +86,9 @@ class Analysis:
 		else:
 			plt.title(histogramtitle)
 		plt.show()
+
+	def plot_array_histogram(self, datalist, red=True, green=True , blue=True, 
+		histogramtitle="RGB Histogram of Overall Dataset", popularity=False,bins=255):
 
 	def plotCSVRGBHistogram(self, datalist, histogramtitle="RGB Histogram of Overall Dataset", popularity=False,bins=64):
 		#numpy.histogram(input_array, bins)
@@ -116,6 +120,8 @@ class Analysis:
 		plt.show()
 
 	def normalize_histogram(self, datalist, low = 0, high = 255):
+		""" Normalize Input List on a range for Histogram usage.
+		"""
 		print "Normalizing from Low {} to High {}".format(low, high)
 		data_min = numpy.amin(datalist)
 		data_max = numpy.amax(datalist)
@@ -125,6 +131,7 @@ class Analysis:
 		return normalized_list
 	
 	def normalize_RGB_array(self, input_array, low = 0, high = 255):
+		"""Normalize an RGB Array - but only of RGB values, and no positional information"""
 		print "Normalizing from Low {} to High {}".format(low, high)
 		data_min = numpy.amin(input_array,axis=0)
 		data_max = numpy.amax(input_array,axis=0)
@@ -133,15 +140,15 @@ class Analysis:
 		#print "Normalized List {}".format(normalized_list)
 		return normalized_list
 	
-	def normalize_PIL_array(self, input_array, rgb_range = ((0, 255), (0, 255), (0, 255))):
+	def normalize_PIL_array(self, input_array, normalization_range = ((0, 255), (0, 255), (0, 255))):
 		"""normalize_PIL_array - 
 		input: numpy Array, RGB Range for Normalization
 		output: Array of normalized values
 		Normalize an input Array over a range. Probably will only work on image Arrays
 		"""
 		image_extrema = im.getextrema()
-		scalar = numpy.subtract((image_extrema[0],image_extrema[1], image_extrema[2]), rgb_range)
-		print "Normalizing from RGB Max and Min Values {}, Extrema {}, Scalar\n {}".format(rgb_range, image_extrema, scalar)
+		scalar = numpy.subtract((image_extrema[0],image_extrema[1], image_extrema[2]), normalization_range)
+		print "Normalizing from RGB Max and Min Values {}, Extrema {}, Scalar\n {}".format(normalization_range, image_extrema, scalar)
 		# Implement Error Checker Later
 		# for number in scalar:
 		# 	for values in number:
@@ -149,28 +156,45 @@ class Analysis:
 		# 			print "Scalar goes into Negative Values"
 		# 			raise BaseException
 		red, green, blue = input_array[:,:,0], input_array[:,:,1], input_array[:,:,2]
-		red = (red - scalar[0][0]) * float(rgb_range[0][1]) / float((image_extrema[0][1] - scalar[0][0]))
-		green = (green - scalar[1][0]) * float(rgb_range[1][1])  / float((image_extrema[1][1] - scalar[1][0]))
-		blue = (blue - scalar[2][0]) * float(rgb_range[2][1])  / float((image_extrema[2][1] - scalar[2][0]))
+		red = (red - scalar[0][0]) * float(normalization_range[0][1]) / float((image_extrema[0][1] - scalar[0][0]))
+		green = (green - scalar[1][0]) * float(normalization_range[1][1])  / float((image_extrema[1][1] - scalar[1][0]))
+		blue = (blue - scalar[2][0]) * float(normalization_range[2][1])  / float((image_extrema[2][1] - scalar[2][0]))
+		# Have to reassign array since the modifications cause it to no longer be contiguous in memory.
 		output_array = numpy.array(input_array).copy()
 		output_array[:,:,0] = red
 		output_array[:,:,1] = green
 		output_array[:,:,2] = blue
 		return output_array
 
-	def color_balance_array(self, input_array, saturation_level = .01, targetcolor = (255, 255, 255)):
-		"""Color Balanceing input Image Array
+	def color_balance_array(self, input_array, targetcolor = (255, 255, 255), 
+							saturation_level = .01, normalization_range = (0,255)):
+		"""Color Balancing input Image Array
 		By converting very dark or very light pixels to White or Black. 
 		Overrides allow for conversion to any Strong Color.
+			Normalize target color to 0 to 1.0, then set max and lower saturation levels. 
+			All pixels past the threshold will be converted.
 		255, 255, 255 = White
 		0, 0, 0 = Black
 		"""
-		targetcolor = "asdf"
-	
+		print "Normalizing Image to Target Color {}".format(targetcolor)
+		norm = colors.Normalize(normalization_range[0],normalization_range[1])
+		targetcolor = norm(targetcolor)
+		normalized_array = norm(input_array)
+		red, green, blue = normalized_array.T
+		replacement_area = (((red > (targetcolor[0] - saturation_level))
+							& (red < (targetcolor[0] + saturation_level))) 
+							& ((green > (targetcolor[1] - saturation_level)) 
+							& (green < (targetcolor[1] + saturation_level)))
+							& ((blue > (targetcolor[2] - saturation_level))
+							& (blue < (targetcolor[2] + saturation_level))))
+		normalized_array[...][replacement_area.T] = targetcolor
+		output_array = numpy.array(input_array).copy() * normalization_range[1]
+		return output_array
+
 	def primary_colors(self, targetcolor):
 		converter = colors.ColorConverter()
 		converter.to_rgb(targetcolor)
-	
+		
 	
 	def loadCSV(self, dbPath):
 		with open(dbPath, 'r') as databasefile:
@@ -213,18 +237,19 @@ if __name__ == '__main__':
 	pix_List = a.imageToList(pix) #Convert Image to List
 	pix_array = numpy.asarray(im)
 	normalized_array = a.normalize_PIL_array(pix_array)
-	print normalized_array
-	new_im = Image.fromarray(normalized_array)
+	#printnormalized_array 
+	balanced_normalized_array = a.color_balance_array(normalized_array, (255, 255, 255))
+	balanced_normalized_array = a.color_balance_array(balanced_normalized_array, (0, 0, 0))
+	new_im = Image.fromarray(balanced_normalized_array)
 	new_pix = new_im.load()
 	new_pix_List = a.imageToList(new_pix)
-
-	#
 
 	#print pix_array
 	#print new_pix
 	#new_im = Image.fromarray(numpy.uint8(normalized_array))
 	#print new_im
 	#plotHistogram(im.histogram(), "Overall Histogram", bins=255)
+	im.show()
 	new_im.show()
 	#print pix_array
 	#print "Plotting User Image {}".format(pix_List)
