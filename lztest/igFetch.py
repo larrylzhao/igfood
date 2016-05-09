@@ -30,7 +30,7 @@ useCount = 0
 #i = 0
 #while (i < 3):
 #	i = i + 1
-while (useCount < 500):
+while (useCount < 60):
 	#time.sleep(2)
 	queryString = 	'https://api.instagram.com/v1/tags/' + tagName + \
 					'/media/recent?access_token=' + access_token + \
@@ -84,7 +84,7 @@ print "max id:" + max_tag_id
 #with open('imageInfo.json', 'w') as outfile:
 #    json.dump(imageInfo, outfile)
 
-f = open('imageInfo5.json', 'w')
+f = open('imageInfo6.json', 'w')
 f.write(imageInfo)
 
 
