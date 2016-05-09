@@ -4,6 +4,11 @@
 Recommender Object
 =========================================
 Recommender
+Ideal Values to Generate: 
+Overall Colorset: Primary and secondary
+Saturation Levels to be used for Color Balancing
+Range for normalization for Color Balancing
+Number of Centroids used on a photo
 
 Usage:
 recommender.py [-vdho] <image_under_test> 
