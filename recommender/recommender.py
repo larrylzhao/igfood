@@ -22,6 +22,7 @@ import csv
 import ntpath
 import os.path
 import random
+import database_manipulation
 
 class Recommender:
     """Basic Recommender"""
@@ -30,52 +31,49 @@ class Recommender:
         self.image_under_test = image_under_test
         self.dbpath = dbpath
         self.reader = None
-        self.loadreader()
+        self.reloadreader()
         self.testList = None
 
-    def loadreader(self):
+    def reloadreader(self):
         if os.path.isfile(dbpath):
             csvfile = open(self.dbpath, 'r')
-            self.reader= csv.reader(csvfile)
-            print "DB Exists and Loaded CSV Format DB Into a Reader Object at self.reader for {}".format(self)
-            return True
-        else:
-            return False
+            try:
+                reader = csv.reader(csvfile)
+                print "DB Exists and Loaded CSV Format DB Into a Reader Object at self.reader for {}".format(self)
+                return reader
+            except:
+                print "No DB to Load"
+                raise
 
     def cluster_wholeset(self):
         #Should we move this?
-        if self.reader is not None:
-            print "Pixel Clustering Based Off DB at {}".format(self.dbpath)
-        else:
-            print "Missing DB Reader Object"
-            raise
-        print array(self.reader_to_list(self.reader))
+        reader=self.reloadreader()
+        print "Pixel Clustering Based Off DB at {}".format(self.dbpath)
+        #print self.reader_to_list(reader)
+        print array(self.reader_to_list(reader))
 
     def reader_to_list(self, reader):
         temp_list = []
         for row in reader:
-            #print row
+            #print "Reader to List {}".format(row)
             temp_list.append(row)
         return temp_list
 
     def fetch_data(self):
         print "Fetching Values Stored in DB for Specific {}".format(self.image_under_test)
-        if self.reader is None:
+        reader = self.reloadreader()
+        found = False
+        for row in reader:
+            if self.image_under_test in row : 
+                print "Found Image {} in DB".format(self.image_under_test)
+                print row
+                found = True
+                return row
+        if found:
+            #TODO - Call Colorset.py or Import the Library at this point
+            print "Push Colorset Value to the Database First"
+            self.push_data()
             raise
-        else:
-            #self.loadreader()
-            found = False
-            for row in self.reader:
-                if self.image_under_test in row : 
-                    print "Found Image {} in DB".format(self.image_under_test)
-                    print row
-                    found = True
-                    return row
-            if found:
-                #TODO - Call Colorset.py or Import the Library at this point
-                print "Push Colorset Value to the Database First"
-                self.push_data()
-                raise
 
     def push_data(self):
         print "Pushing Values Stored in DB for Item {}".format(self.image_under_test)
@@ -119,7 +117,6 @@ if __name__ == '__main__':
     dbpath = arguments['--dbpath'] or 'colorsetDB.csv'
 
     recommendation = Recommender(image_under_test, dbpath)
-    #recommendation.loadreader()
     recommendation.fetch_data()
     recommendation.cluster_wholeset()
 
