@@ -1,7 +1,7 @@
-var myNgApp = angular.module('myNgApp', []);
+var myNgApp = angular.module('myNgApp', ['ngAnimate', 'ui.bootstrap', 'ngFileUpload']);
 
-myNgApp.controller('AppCtrl', ['$scope', '$http',
-	function($scope, $http) {
+myNgApp.controller('AppCtrl', ['$scope', '$http', 'Upload', '$timeout',
+	function($scope, $http, Upload, $timeout) {
 		console.log("hello world controller");
 
 	//$scope.hello = "hello world binding";
@@ -59,7 +59,43 @@ myNgApp.controller('AppCtrl', ['$scope', '$http',
 	}
 
 
+
 	$scope.colorGroups = ["pink","purple","red","orange","yellow","green","cyan","blue","brown","white","grey"];
+	$scope.colors = [];
+	$scope.colors['pink'] = ["pink","lightpink","hotpink","deeppink","palevioletpred","mediumvioletred"];
+	$scope.colors['purple'] = ["Lavender","Thistle","Plum"];
+	$scope.isCollapsed = true;
+
+	$scope.oneAtATime = true;
+	$scope.status = {
+	    isFirstOpen: true,
+	    isFirstDisabled: false
+	};
+	$scope.show = false;
+
+	$scope.uploadFiles = function(file, errFiles) {
+        $scope.f = file;
+        $scope.errFile = errFiles && errFiles[0];
+        if (file) {
+        	console.log("i got a file upload");
+            file.upload = Upload.upload({
+                url: '/upload',
+                data: {file: file}
+            });
+
+            file.upload.then(function (response) {
+                $timeout(function () {
+                    file.result = response.data;
+                });
+            }, function (response) {
+                if (response.status > 0)
+                    $scope.errorMsg = response.status + ': ' + response.data;
+            }, function (evt) {
+                file.progress = Math.min(100, parseInt(100.0 * 
+                                         evt.loaded / evt.total));
+            });
+        }   
+    }
 
 }]);
 
