@@ -91,6 +91,7 @@ myNgApp.controller('AppCtrl', ['$scope', '$http', 'Upload', '$timeout',
             	$scope.rhisto = "upload/rhisto/"+str;
             	$scope.ghisto = "upload/ghisto/"+str;
             	$scope.bhisto = "upload/bhisto/"+str;
+            	$scope.show = true;
                 $timeout(function () {
                     file.result = response.data;
                 });
