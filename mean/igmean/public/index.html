@@ -21,15 +21,26 @@
           accept="image/*" ngf-max-height="1000" ngf-max-size="1MB">
       Select File</button>
   <br><br>
-  File:
+ <!--  File:
   <div style="font:smaller">{{f.name}} {{errFile.name}} {{errFile.$error}} {{errFile.$errorParam}}
       <span class="progress" ng-show="f.progress >= 0">
           <div style="width:{{f.progress}}%"  
                ng-bind="f.progress + '%'"></div>
       </span>
   </div>     
-  {{errorMsg}}
+  {{errorMsg}} -->
 
+  <div ng-show="orig">
+  		<table cellpadding="100" style="display: inline-block; vertical-align: middle; padding: 50px">
+  			<tr><td style="padding: 20px">Original</td><td><img src="{{orig}}" style="max-width: 300px"></td></tr>
+  			<tr><td style="padding: 20px">Color Corrected</td><td><img src="{{cb}}" style="max-width: 300px"></td></tr>
+  		</table>
+  		<table cellpadding="10" style="display: inline-block; vertical-align: middle; padding: 50px; border-left:1px solid; ">
+  			<tr><td style="padding: 20px">Red Channel</td><td><img src="{{rhisto}}" style="max-width: 300px"></td></tr>
+  			<tr><td style="padding: 20px">Green Channel</td><td><img src="{{ghisto}}" style="max-width: 300px"></td></tr>
+  			<tr><td style="padding: 20px">Blue Channel</td><td><img src="{{bhisto}}" style="max-width: 300px"></td></tr>
+  		</table>
+  </div>
 		<!-- <form action="result.html">
 			<br/>	
 			<input type="file" name="pic" accept="image/*">
