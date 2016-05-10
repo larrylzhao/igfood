@@ -16,14 +16,14 @@ app.get('/igfoodlist', function (req, res) {
   console.log("i received a get request");
 
   db.igfoodlist2.find(function (err, docs) {
-    console.log(docs);
+    //console.log(docs);
     res.json(docs);
 
   });
 });
 
 app.post('/igfoodlist', function (req, res) {
-  console.log("hellooooooo" + req.body);
+  //console.log("hellooooooo" + req.body);
   db.igfoodlist2.insert(req.body, function(err, doc) {
     res.json(doc);
   });
@@ -61,17 +61,25 @@ app.get('/igfoodlist/tn/:tn', function (req, res) {
 app.get('/upload/orig/:tn', function (req, res) {
   var tn = req.params.tn;
   var fs = require('fs');
-  fs.readFile('./public/algo_out/'+tn+'.png', function(err, data) {
+  fs.readFile('./public/input/'+tn+'.jpg', function(err, data) {
       res.writeHead(200, {'Content-Type': 'image/jpeg'});
       res.end(data); // Send the file data to the browser.
     console.log('file opened by controller!');
   });
 });
 
+app.get('/upload/origSize/:tn', function (req, res) {
+  var tn = req.params.tn;
+  var sizeOf = require('image-size');
+  sizeOf('./public/input/'+tn+'.jpg', function (err, dimensions) {
+    res.status(200).send([dimensions.width, dimensions.height]);
+  });
+});
+
 app.get('/upload/cb/:tn', function (req, res) {
   var tn = req.params.tn;
   var fs = require('fs');
-  fs.readFile('./public/algo_out/'+tn+'-corrected.png', function(err, data) {
+  fs.readFile('./public/output/'+tn+'/scaled_color_balanced_im_'+tn+'.jpg', function(err, data) {
       res.writeHead(200, {'Content-Type': 'image/jpeg'});
       res.end(data); // Send the file data to the browser.
     console.log('file opened by controller!');

@@ -14,31 +14,38 @@
 </head>
 <body>
 	<div class="container" ng-controller="AppCtrl">
-		<h1>Instagram Food</h1>
-		<h4>How popular will your photo be? Upload an image and find out!</h3>
+		<h1>Instagram Food Color Corrector</h1>
+		<h4>Let us color correct your image!</h3>
 		<!-- <form action="demo_form.asp"> -->
   <button type="file" ngf-select="uploadFiles($file, $invalidFiles)"
           accept="image/*" ngf-max-height="1000" ngf-max-size="1MB">
       Select File</button>
   <br><br>
- <!--  File:
+  File:
   <div style="font:smaller">{{f.name}} {{errFile.name}} {{errFile.$error}} {{errFile.$errorParam}}
       <span class="progress" ng-show="f.progress >= 0">
           <div style="width:{{f.progress}}%"  
                ng-bind="f.progress + '%'"></div>
       </span>
   </div>     
-  {{errorMsg}} -->
+  {{errorMsg}}
+
+
+	    
+
 
   <div ng-show="orig">
   		<table cellpadding="100" style="display: inline-block; vertical-align: middle; padding: 50px">
-  			<tr><td style="padding: 20px">Original</td><td><img src="{{orig}}" style="max-width: 300px"></td></tr>
-  			<tr><td style="padding: 20px">Color Corrected</td><td><img src="{{cb}}" style="max-width: 300px"></td></tr>
+  			<tr><td colspan="2"><div id="twoface-demo"></div></td></tr>
+  			<tr><td align="left">Before</td>
+  			<td align="right">After</td></tr> 			
+  			<!-- <tr><td style="padding: 20px">Original</td><td><img src="{{orig}}" style="max-width: 300px"></td></tr>
+  			<tr><td style="padding: 20px">Color Corrected</td><td><img src="{{cb}}" style="max-width: 300px"></td></tr> -->
   		</table>
   		<table cellpadding="10" style="display: inline-block; vertical-align: middle; padding: 50px; border-left:1px solid; ">
-  			<tr><td style="padding: 20px">Red Channel</td><td><img src="{{rhisto}}" style="max-width: 300px"></td></tr>
-  			<tr><td style="padding: 20px">Green Channel</td><td><img src="{{ghisto}}" style="max-width: 300px"></td></tr>
-  			<tr><td style="padding: 20px">Blue Channel</td><td><img src="{{bhisto}}" style="max-width: 300px"></td></tr>
+  			<tr><td align="right" style="padding: 20px">Red Channel</td><td><img src="{{rhisto}}" style="max-width: 300px"></td></tr>
+  			<tr><td align="right" style="padding: 20px">Green Channel</td><td><img src="{{ghisto}}" style="max-width: 300px"></td></tr>
+  			<tr><td align="right" style="padding: 20px">Blue Channel</td><td><img src="{{bhisto}}" style="max-width: 300px"></td></tr>
   		</table>
   </div>
 		<!-- <form action="result.html">
