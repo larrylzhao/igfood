@@ -147,7 +147,7 @@ class ColorSet(igFood):
 
 	def save_images(self, output_path = "colorset_test.png"):
 		"""Save All Image Results to Path"""
-		self.kmeans_colorset_im.save(output_path + 'kmeans_colorset_im' + self.filename)
+		self.kmeans_colorset_im.save(output_path + 'kmeans_colorset_im_' + self.filename)
 
 class ColorBalancing(ColorSet):
 	"""Simple Color Balancing and Normalizing on Input Ranges and Colors"""
