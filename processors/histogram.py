@@ -3,7 +3,7 @@
 Input values, output histogram and histogram image
 Usage:
 histogram.py [-vh] <input_image> 
-histogram.py [-vh] <input_image> <input_database>
+histogram.py [-vh] database <input_image> <input_database>
 
 Options:
 	-h --help                          show this help message
@@ -16,11 +16,9 @@ from scipy.cluster.vq import vq, kmeans, whiten
 import csv
 import ntpath
 import os.path
-import colorset
 import json
 import numpy
 import math
-import colorset
 from pprint import pprint
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -47,7 +45,7 @@ class Analysis:
 		plt.title(histogramtitle)
 		plt.show()
 
-	def plotRGBHistogram(self, datalist, red=True, green=True , blue=True, histogramtitle="RGB Histogram of Overall Dataset", popularity=False,bins=255):
+	def plotRGBHistogram(self, datalist, red=True, green=True , blue=True, histogramtitle="RGB Histogram of Overall Dataset", popularity=False, bins=255):
 		#numpy.histogram(input_array, bins)
 		redList=[]
 		greenList=[]
@@ -69,26 +67,32 @@ class Analysis:
 		redList_normalized = self.normalize_histogram(redList)
 		greenList_normalized = self.normalize_histogram(greenList)
 		blueList_normalized = self.normalize_histogram(blueList)
-	
+		
+		output_filename=in_filename
 		if red:
 			plt.hist(redList, bins = 64, color = 'red', histtype='step')
 			plt.hist(redList_normalized, bins = 64, color = 'lightpink', histtype='step')
+			output_filename = "red"+output_filename
 		if green:
 			plt.hist(greenList, bins = 64, color = 'green', histtype='step')
 			plt.hist(greenList_normalized, bins = 64, color = 'lightgreen', histtype='step')
+			output_filename = "green"+output_filename
 		if blue:
 			plt.hist(blueList, bins = 64, color = 'blue', histtype='step')
 			plt.hist(blueList_normalized, bins = 64, color = 'lightblue', histtype='step')
+			output_filename = "blue"+output_filename
+		output_filename = "histogram_" + str(saturation_level) + str(balance_level1) + str(balance_level2) + output_filename
 	
 		#plt.plot(red_histogram, color = 'red')
 		if popularity:
 			plt.title("Popularity Weighted Data" + histogramtitle)
 		else:
 			plt.title(histogramtitle)
-		plt.show()
+		#plt.show()
+		plt.savefig(output_filename)
 
-	def plot_array_histogram(self, datalist, red=True, green=True , blue=True, 
-		histogramtitle="RGB Histogram of Overall Dataset", popularity=False,bins=255):
+	#def plot_array_histogram(self, datalist, red=True, green=True , blue=True, 
+		#histogramtitle="RGB Histogram of Overall Dataset", popularity=False,bins=255):
 
 	def plotCSVRGBHistogram(self, datalist, histogramtitle="RGB Histogram of Overall Dataset", popularity=False,bins=64):
 		#numpy.histogram(input_array, bins)
@@ -119,7 +123,7 @@ class Analysis:
 			plt.title(histogramtitle)
 		plt.show()
 
-	def normalize_histogram(self, datalist, low = 0, high = 255):
+	def normalize_histogram(self, datalist, low = 0, high = 300):
 		""" Normalize Input List on a range for Histogram usage.
 		"""
 		print "Normalizing from Low {} to High {}".format(low, high)
@@ -188,7 +192,10 @@ class Analysis:
 							& ((blue > (targetcolor[2] - saturation_level))
 							& (blue < (targetcolor[2] + saturation_level))))
 		normalized_array[...][replacement_area.T] = targetcolor
-		output_array = numpy.array(input_array).copy() * normalization_range[1]
+		print "Target Color {} Saturation Level {} TargetColor Values {}".format(targetcolor, saturation_level,(targetcolor[0] - saturation_level))
+		#print replacement_area
+		output_array = (numpy.array(normalized_array).copy() * normalization_range[1]).astype('uint8')
+		#print output_array
 		return output_array
 
 	def primary_colors(self, targetcolor):
@@ -238,24 +245,33 @@ if __name__ == '__main__':
 	pix_array = numpy.asarray(im)
 	normalized_array = a.normalize_PIL_array(pix_array)
 	#printnormalized_array 
-	balanced_normalized_array = a.color_balance_array(normalized_array, (255, 255, 255))
-	balanced_normalized_array = a.color_balance_array(balanced_normalized_array, (0, 0, 0))
-	new_im = Image.fromarray(balanced_normalized_array)
-	new_pix = new_im.load()
-	new_pix_List = a.imageToList(new_pix)
 
-	#print pix_array
-	#print new_pix
-	#new_im = Image.fromarray(numpy.uint8(normalized_array))
-	#print new_im
-	#plotHistogram(im.histogram(), "Overall Histogram", bins=255)
-	im.show()
-	new_im.show()
-	#print pix_array
-	#print "Plotting User Image {}".format(pix_List)
-	a.plotRGBHistogram(pix_List, True, False, False, "RGB Histogram of Image {}".format(input_image))
-	a.plotRGBHistogram(new_pix_List, True, False, False, "RGB Histogram of Image {}".format(input_image))
-
+	for balance_level1, balance_level2 in [((0, 0, 0), (255, 255, 255)),([84, 73, 71], [168, 135, 107])]:
+		print "Balance Level 1 {} 2 {} ".format(balance_level1, balance_level2)
+		for saturation_level in [0, 0.01, 0.05, 0.1, 0.25]:
+			balanced_normalized_array = a.color_balance_array(normalized_array, balance_level1, saturation_level)
+			balanced_normalized_array = a.color_balance_array(balanced_normalized_array, balance_level2, saturation_level)
+			norm_im = Image.fromarray(normalized_array)
+			cb_im = Image.fromarray(balanced_normalized_array)
+			#new_pix = new_im.load()
+			#new_pix_List = a.imageToList(new_pix)
+			#print pix_array
+			#print new_pix
+			#new_im = Image.fromarray(numpy.uint8(normalized_array))
+			#print new_im
+			#plotHistogram(im.histogram(), "Overall Histogram", bins=255)
+			im.show()
+			norm_im.show()
+			cb_im.show()
+			in_filename = ntpath.basename(input_image)
+			norm_im.save("Normalized_" + in_filename)
+			cb_im.save("ColorBalanced_SatLevel_" + str(saturation_level) + str(balance_level1) + str(balance_level2) + in_filename)
+			#print pix_array
+			#print "Plotting User Image {}".format(pix_List)
+			a.plotRGBHistogram(pix_List, True, False, False, "RGB Histogram of Image {} \nBalance Level {} {}".format(input_image, balance_level1, balance_level2))
+			a.plotRGBHistogram(pix_List, False, True, False, "RGB Histogram of Image {} \nBalance Level {} {}".format(input_image, balance_level1, balance_level2))
+			a.plotRGBHistogram(pix_List, False, False, True, "RGB Histogram of Image {} \nBalance Level {} {}".format(input_image, balance_level1, balance_level2))
+	
 	#histogram(input_path)
 
 
