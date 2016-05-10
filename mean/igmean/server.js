@@ -68,6 +68,14 @@ app.get('/upload/orig/:tn', function (req, res) {
   });
 });
 
+app.get('/upload/origSize/:tn', function (req, res) {
+  var tn = req.params.tn;
+  var sizeOf = require('image-size');
+  sizeOf('./public/input/'+tn+'.jpg', function (err, dimensions) {
+    res.status(200).send([dimensions.width, dimensions.height]);
+  });
+});
+
 app.get('/upload/cb/:tn', function (req, res) {
   var tn = req.params.tn;
   var fs = require('fs');
