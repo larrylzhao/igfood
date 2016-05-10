@@ -99,7 +99,7 @@ app.get('/upload/ghisto/:tn', function (req, res) {
 });
 
 app.get('/upload/bhisto/:tn', function (req, res) {
-  var tn = req.pabams.tn;
+  var tn = req.params.tn;
   var fs = require('fs');
   fs.readFile('./public/algo_out/'+tn+'-b-histo.png', function(err, data) {
       res.writeHead(200, {'Content-Type': 'image/jpeg'});
