@@ -21,14 +21,14 @@
           accept="image/*" ngf-max-height="1000" ngf-max-size="1MB">
       Select File</button>
   <br><br>
- <!--  File:
+  File:
   <div style="font:smaller">{{f.name}} {{errFile.name}} {{errFile.$error}} {{errFile.$errorParam}}
       <span class="progress" ng-show="f.progress >= 0">
           <div style="width:{{f.progress}}%"  
                ng-bind="f.progress + '%'"></div>
       </span>
   </div>     
-  {{errorMsg}} -->
+  {{errorMsg}}
 
   <div ng-show="orig">
   		<table cellpadding="100" style="display: inline-block; vertical-align: middle; padding: 50px">

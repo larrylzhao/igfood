@@ -73,12 +73,12 @@ myNgApp.controller('AppCtrl', ['$scope', '$http', 'Upload', '$timeout',
 	};
 	$scope.show = false;
 
-	var tmpstr = "BFE20Rpnx5X";
-	$scope.orig = "upload/orig/"+tmpstr;
-    $scope.cb = "upload/cb/"+tmpstr;
-	$scope.rhisto = "upload/rhisto/"+tmpstr;
-	$scope.ghisto = "upload/ghisto/"+tmpstr;
-	$scope.bhisto = "upload/bhisto/"+tmpstr;
+	// var tmpstr = "BFE20Rpnx5X";
+	// $scope.orig = "upload/orig/"+tmpstr;
+ //    $scope.cb = "upload/cb/"+tmpstr;
+	// $scope.rhisto = "upload/rhisto/"+tmpstr;
+	// $scope.ghisto = "upload/ghisto/"+tmpstr;
+	// $scope.bhisto = "upload/bhisto/"+tmpstr;
 	$scope.uploadFiles = function(file, errFiles) {
         $scope.f = file;
         $scope.errFile = errFiles && errFiles[0];

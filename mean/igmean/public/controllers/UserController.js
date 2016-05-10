@@ -8,12 +8,12 @@ UserController.prototype.uploadFile = function(req, res) {
     //console.log(file.type);
     //console.log(file);
     var fs = require('fs');
-	fs.createReadStream(file.path).pipe(fs.createWriteStream('./public/test/' + file.name));
+	fs.createReadStream(file.path).pipe(fs.createWriteStream('./public/input/' + file.name));
 	var python = require('child_process').spawn(
 	    'python',
 	    // second argument is array of parameters, e.g.:
-	    ["hello.py"]
-	    //, req.files.myUpload.path
+	    ["igFood.py"
+	    , './public/input/' + file.name]
 	    //, req.files.myUpload.type]
 	  );
 	  var output = "";
