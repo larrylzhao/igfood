@@ -73,16 +73,35 @@ app.put('/igfoodlist/:id', function (req, res) {
 });
 
 app.post('/upload', function (req, res) {
-  console.log("trying to upload a file " + req.body);
+  console.log("trying to upload a file ");
   exports.create = function (req, res, next) {
+    console.log("wtf is going on");
     var data = _.pick(req.body, 'type')
-        , uploadPath = path.normalize('./public/test/uploads')
-        , file = req.files.file;
+      , uploadPath = path.normalize('./public/test/uploads')
+      , file = req.files.file;
 
-        console.log(file.name); //original name (ie: sunset.png)
-        console.log(file.path); //tmp path (ie: /tmp/12345-xyaz.png)
+      console.log(file.name); //original name (ie: sunset.png)
+      console.log(file.path); //tmp path (ie: /tmp/12345-xyaz.png)
     console.log(uploadPath); //uploads directory: (ie: /home/user/data/uploads)
   };
+
+  var python = require('child_process').spawn(
+    'python',
+    // second argument is array of parameters, e.g.:
+    ["hello.py"]
+    //, req.files.myUpload.path
+    //, req.files.myUpload.type]
+  );
+  var output = "";
+  python.stdout.on('data', function(data){ output += data });
+  python.on('close', function(code){ 
+    console.log("python output:" + output);
+    if (code !== 0) {  
+        return res.send(500, code); 
+    }
+    return res.status(200).send(output);
+  });
+  
 });
 
 

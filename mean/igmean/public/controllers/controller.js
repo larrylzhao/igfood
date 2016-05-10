@@ -84,10 +84,12 @@ myNgApp.controller('AppCtrl', ['$scope', '$http', 'Upload', '$timeout',
             });
 
             file.upload.then(function (response) {
+            	console.log(response.data);
                 $timeout(function () {
                     file.result = response.data;
                 });
             }, function (response) {
+            	console.log("upload response: " + response);
                 if (response.status > 0)
                     $scope.errorMsg = response.status + ': ' + response.data;
             }, function (evt) {
