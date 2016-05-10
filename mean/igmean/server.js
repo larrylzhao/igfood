@@ -6,9 +6,9 @@ var bodyParser = require('body-parser');
 var fs = require("fs");
 var multipart = require('connect-multiparty');
 
-app.use(multipart({
-    uploadDir: "public/test/"
-}));
+// app.use(multipart({
+//     uploadDir: "public/test/"
+// }));
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json());
 
@@ -52,11 +52,58 @@ app.get('/igfoodlist/tn/:tn', function (req, res) {
   });*/
   var fs = require('fs');
   fs.readFile('../../lztest/thumbnails2/'+tn+'.jpg', function(err, data) {
-    //if (err) throw err; // Fail if the file can't be read.
-    //http.createServer(function(req, res) {
       res.writeHead(200, {'Content-Type': 'image/jpeg'});
       res.end(data); // Send the file data to the browser.
-    //}).listen(8124);*/
+    console.log('file opened by controller!');
+  });
+});
+
+app.get('/upload/orig/:tn', function (req, res) {
+  var tn = req.params.tn;
+  var fs = require('fs');
+  fs.readFile('./public/algo_out/'+tn+'.png', function(err, data) {
+      res.writeHead(200, {'Content-Type': 'image/jpeg'});
+      res.end(data); // Send the file data to the browser.
+    console.log('file opened by controller!');
+  });
+});
+
+app.get('/upload/cb/:tn', function (req, res) {
+  var tn = req.params.tn;
+  var fs = require('fs');
+  fs.readFile('./public/algo_out/'+tn+'-corrected.png', function(err, data) {
+      res.writeHead(200, {'Content-Type': 'image/jpeg'});
+      res.end(data); // Send the file data to the browser.
+    console.log('file opened by controller!');
+  });
+});
+
+app.get('/upload/rhisto/:tn', function (req, res) {
+  var tn = req.params.tn;
+  var fs = require('fs');
+  fs.readFile('./public/algo_out/'+tn+'-r-histo.png', function(err, data) {
+      res.writeHead(200, {'Content-Type': 'image/jpeg'});
+      res.end(data); // Send the file data to the browser.
+    console.log('file opened by controller!');
+  });
+});
+
+app.get('/upload/ghisto/:tn', function (req, res) {
+  var tn = req.params.tn;
+  var fs = require('fs');
+  fs.readFile('./public/algo_out/'+tn+'-g-histo.png', function(err, data) {
+      res.writeHead(200, {'Content-Type': 'image/jpeg'});
+      res.end(data); // Send the file data to the browser.
+    console.log('file opened by controller!');
+  });
+});
+
+app.get('/upload/bhisto/:tn', function (req, res) {
+  var tn = req.pabams.tn;
+  var fs = require('fs');
+  fs.readFile('./public/algo_out/'+tn+'-b-histo.png', function(err, data) {
+      res.writeHead(200, {'Content-Type': 'image/jpeg'});
+      res.end(data); // Send the file data to the browser.
     console.log('file opened by controller!');
   });
 });
@@ -72,38 +119,48 @@ app.put('/igfoodlist/:id', function (req, res) {
 
 });
 
-app.post('/upload', function (req, res) {
-  console.log("trying to upload a file ");
-  exports.create = function (req, res, next) {
-    console.log("wtf is going on");
-    var data = _.pick(req.body, 'type')
-      , uploadPath = path.normalize('./public/test/uploads')
-      , file = req.files.file;
+// app.post('/upload2', function (req, res) {
+//   console.log("trying to upload a file ");
+//   exports.create = function (req, res, next) {
+//     console.log("wtf is going on");
+//     var data = _.pick(req.body, 'type')
+//       , uploadPath = path.normalize('./public/test/uploads')
+//       , file = req.files.file;
 
-      console.log(file.name); //original name (ie: sunset.png)
-      console.log(file.path); //tmp path (ie: /tmp/12345-xyaz.png)
-    console.log(uploadPath); //uploads directory: (ie: /home/user/data/uploads)
-  };
+//       console.log(file.name); //original name (ie: sunset.png)
+//       console.log(file.path); //tmp path (ie: /tmp/12345-xyaz.png)
+//     console.log(uploadPath); //uploads directory: (ie: /home/user/data/uploads)
+//   };
 
-  var python = require('child_process').spawn(
-    'python',
-    // second argument is array of parameters, e.g.:
-    ["hello.py"]
-    //, req.files.myUpload.path
-    //, req.files.myUpload.type]
-  );
-  var output = "";
-  python.stdout.on('data', function(data){ output += data });
-  python.on('close', function(code){ 
-    console.log("python output:" + output);
-    if (code !== 0) {  
-        return res.send(500, code); 
-    }
-    return res.status(200).send(output);
-  });
+//   var python = require('child_process').spawn(
+//     'python',
+//     // second argument is array of parameters, e.g.:
+//     ["hello.py"]
+//     //, req.files.myUpload.path
+//     //, req.files.myUpload.type]
+//   );
+//   var output = "";
+//   python.stdout.on('data', function(data){ output += data });
+//   python.on('close', function(code){ 
+//     console.log("python output:" + output);
+//     if (code !== 0) {  
+//         return res.send(500, code); 
+//     }
+//     return res.status(200).send(output);
+//   });
   
-});
+// });
 
+
+// Requires multiparty 
+multiparty = require('connect-multiparty'),
+multipartyMiddleware = multiparty(),
+
+// Requires controller
+UserController = require('./public/controllers/UserController');
+
+// Example endpoint 
+app.post('/upload', multipartyMiddleware, UserController.uploadFile);
 
 //Create an output of data info
 // var outStr = "";

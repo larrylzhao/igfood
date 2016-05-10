@@ -30,6 +30,15 @@
   </div>     
   {{errorMsg}}
 
+  <div>
+  		<table>
+  			<tr><td>Original</td><td><img src="{{orig}}" style="max-width: 300px"></td></tr>
+  			<tr><td>Color Corrected</td><td><img src="{{cb}}" style="max-width: 300px"></td></tr>
+  			<tr><td>Red Channel</td><td><img src="{{rhisto}}" style="max-width: 300px"></td></tr>
+  			<tr><td>Green Channel</td><td><img src="{{ghisto}}" style="max-width: 300px"></td></tr>
+  			<tr><td>Blue Channel</td><td><img src="{{bhisto}}" style="max-width: 300px"></td></tr>
+  		</table>
+  </div>
 		<!-- <form action="result.html">
 			<br/>	
 			<input type="file" name="pic" accept="image/*">

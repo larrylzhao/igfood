@@ -84,12 +84,18 @@ myNgApp.controller('AppCtrl', ['$scope', '$http', 'Upload', '$timeout',
             });
 
             file.upload.then(function (response) {
-            	console.log(response.data);
+            	var str = response.data;
+            	str = str.replace(/\.jpg/i, "");
+            	$scope.orig = "upload/orig/"+str;
+            	$scope.cb = "upload/cb/"+str;
+            	$scope.rhisto = "upload/rhisto/"+str;
+            	$scope.ghisto = "upload/ghisto/"+str;
+            	$scope.bhisto = "upload/bhisto/"+str;
                 $timeout(function () {
                     file.result = response.data;
                 });
             }, function (response) {
-            	console.log("upload response: " + response);
+            	//console.log("upload response: " + response);
                 if (response.status > 0)
                     $scope.errorMsg = response.status + ': ' + response.data;
             }, function (evt) {
@@ -100,7 +106,6 @@ myNgApp.controller('AppCtrl', ['$scope', '$http', 'Upload', '$timeout',
     }
 
 }]);
-
 
 
 
