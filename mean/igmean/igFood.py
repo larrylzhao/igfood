@@ -3,13 +3,14 @@
 End all be all
 Input values, output histogram and histogram image
 Usage:
-igFood.py [-vhd] <input_image> 
-igFood.py [-vhd] <input_image> <output_path>
+igFood.py [-vhl] <input_image> 
+igFood.py [-vhl] <input_image> <output_path>
+igFood.py [-vhl] <input_image> --database=<dbPath>
 
 Options:
-	-h --help                          show this help message
-	-v --verbose                       show input and output image
-	-d --database 
+	-h --help							show this help message
+	-v --verbose						show input and output image
+	-l --learning 						enable storing of values
 """
 from docopt import docopt
 from PIL import Image, ImageDraw
@@ -61,26 +62,6 @@ def check_duplicate(dbPath, in_filename):
 	else:
 		return False
 
-def append_database(self, colorset, in_filename="test.png", dbPath="./../database/colorsetDB.csv"):
-	"""Append to DataBase"""
-	dataset = colorset
-	##TODO : Check Duplicate
-	#add checkDuplicate(dbPath, in_filename) to if statement		
-	if os.path.isfile(dbPath):
-		print "Appending to database at {}".format(dbPath)
-		with open(dbPath, 'a') as databasefile:
-			fields=['in_filename', 'colorset_1', 'colorset_2', 'colorset_3']
-			writer = csv.DictWriter(databasefile,fieldnames=fields)
-			writer.writerow({'in_filename':in_filename, 'colorset_1': dataset[0], 'colorset_2':dataset[1], 'colorset_3':dataset[2]})
-	else:
-		print "Database does not exist, creating file at {}".format(dbPath)
-		with open(dbPath, 'w') as databasefile:
-			print "Appending value to database at {0}".format(dbPath)
-			fields=['in_filename', 'colorset_1', 'colorset_2', 'colorset_3']
-			writer = csv.DictWriter(databasefile,fieldnames=fields)
-			writer.writeheader()
-			writer.writerow({'in_filename':in_filename, 'colorset_1': dataset[0], 'colorset_2':dataset[1], 'colorset_3':dataset[2]})
-
 class igFood(object):
 	"""igFood Base Class"""
 	def __init__(self, filepath = "test.png", verbose = False):
@@ -119,6 +100,33 @@ class igFood(object):
 		if verbose:
 			colorset_im.show()
 		return colorset_im
+	
+	def get_JSON_values(self, json_path = "./../../lztest/imageInfo2.json"):
+		"""Get Ratings from JSON""" 
+		if os.path.exists(json_path):
+			print "Fetching JSON from {} ".format(json_path)
+		else:
+			print "JSON Doesn't exist"
+			return False	
+		self.in_json_file = open(json_path, 'r')
+		self.in_json_data = json.load(self.in_json_file)
+		#self.json_dict = dict
+
+		#print len(self.json_data['data'])
+		for photo_number in range(0,len(self.in_json_data['data'])):
+			#print self.json_data['data'][photo_number]['link']
+			link_name = re.split('/+', self.in_json_data['data'][photo_number]['link'])[3]
+			#print link_photoname
+			#self.json_dict.update(self.json_data['data'][photo].iteritems())
+			#print os.path.splitext(self.filename)[0] + link_name
+			if os.path.splitext(self.filename)[0] == link_name:
+				print "Match Found in Dataset at Element Number {}".format(photo_number)
+				for photo_keys, photo_values in self.in_json_data['data'][photo_number].iteritems():
+					print photo_keys, photo_values
+				self.likes = self.in_json_data['data'][photo_number]['likes']
+				return True
+		
+		return False
 
 class ColorSet(igFood):
 	"""Color Set Determination
@@ -129,6 +137,21 @@ class ColorSet(igFood):
 		super(ColorSet, self).__init__(filepath)
 		self.kmeans_centroids = self.kmeans_cluster(self.pix_array)
 		self.kmeans_colorset_im = self.get_rgb_visualization(self.kmeans_centroids, verbose)
+
+	# def save_JSON_values(self, json_path = "./../../lztest/learning.json"):
+	# 	"""Save ColorSets to JSON"""
+	# 	if os.path.exists(json_path):
+	# 		print "Saving JSON at {} ".format(json_path)
+	# 	else:
+	# 		print "JSON Doesn't exist, making new JSON"
+	# 		with open(json_path, 'w', encoding='utf-8') as out_json_file:
+	# 			self.out_json_data = json.load(out_json_file)
+	# 			out_json_data['name'] = os.path.splitext(self.filename)[0]
+	# 			out_json_file.close()
+	# 	with open(json_path, 'r+', encoding='utf-8') as out_json_file:	
+	# 		self.out_json_data = json.load(out_json_file)
+	# 		data['name'] = os.path.splitext(self.filename)[0]
+	# 		out_json_file.close()
 
 	def get_kmeans_centroids(self):
 		"""Get Color Set Values"""
@@ -246,6 +269,7 @@ class ColorBalancing(ColorSet):
 
 	def save_images(self, output_path = "colorset_test.png"):
 		"""Save All Image Results to path"""
+		super(ColorBalancing, self).save_images(output_path)
 		self.color_balanced_im.save(output_path + 'color_balanced_im_' + self.filename)
 		self.scaled_color_balanced_im.save(output_path + "scaled_color_balanced_im_" + self.filename)
 
@@ -394,6 +418,38 @@ class ColorBalancing(ColorSet):
 
 		#plt.show()
 
+	#append_database(kmeans_centroids, likes, red_range, green_range, blue_range, filename)
+	def append_database(self, dbPath="./../../database/learningDB.csv"):
+		"""Append to DataBase"""
+		##TODO : Check Duplicate
+		#add checkDuplicate(dbPath, in_filename) to if statement		
+		if os.path.isfile(dbPath):
+			print "Appending to database at {}".format(dbPath)
+			with open(dbPath, 'a') as databasefile:
+				fields=['in_filename', 'likes', 'colorset_1_r', 'colorset_1_g', 'colorset_1_b', 'colorset_2_r', 'colorset_2_g', 'colorset_2_b', 
+						'colorset_3_r', 'colorset_3_g', 'colorset_3_b', 'red_range_l', 'red_range_h', 'green_range_l', 'green_range_h', 'blue_range_l', 'blue_range_h']
+				writer = csv.DictWriter(databasefile, fieldnames=fields)
+				writer.writerow({'in_filename':self.filename, 'likes':self.likes, 
+								'colorset_1_r':self.kmeans_centroids[0][0], 'colorset_1_g':self.kmeans_centroids[0][0], 'colorset_1_b':self.kmeans_centroids[0][0], 
+								'colorset_2_r':self.kmeans_centroids[1][0], 'colorset_2_g':self.kmeans_centroids[1][0], 'colorset_2_b':self.kmeans_centroids[1][0], 
+								'colorset_3_r':self.kmeans_centroids[2][0], 'colorset_3_g':self.kmeans_centroids[2][0], 'colorset_3_b':self.kmeans_centroids[2][0], 
+								'red_range_l':self.red_range[0], 'red_range_h':self.red_range[1], 'green_range_l':self.green_range[0], 'green_range_h':self.green_range[1], 
+								'blue_range_l':self.blue_range[0], 'blue_range_h':self.blue_range[1]}),
+		else:
+			print "Database does not exist, creating file at {}".format(dbPath)
+			with open(dbPath, 'w') as databasefile:
+				print "Appending value to database at {0}".format(dbPath)
+				fields=['in_filename', 'likes', 'colorset_1_r', 'colorset_1_g', 'colorset_1_b', 'colorset_2_r', 'colorset_2_g', 'colorset_2_b', 
+						'colorset_3_r', 'colorset_3_g', 'colorset_3_b', 'red_range_l', 'red_range_h', 'green_range_l', 'green_range_h', 'blue_range_l', 'blue_range_h']
+				writer = csv.DictWriter(databasefile,fieldnames=fields)
+				writer.writeheader()
+				writer.writerow({'in_filename':self.filename, 'likes':self.likes, 
+								'colorset_1_r':self.kmeans_centroids[0][0], 'colorset_1_g':self.kmeans_centroids[0][0], 'colorset_1_b':self.kmeans_centroids[0][0], 
+								'colorset_2_r':self.kmeans_centroids[1][0], 'colorset_2_g':self.kmeans_centroids[1][0], 'colorset_2_b':self.kmeans_centroids[1][0], 
+								'colorset_3_r':self.kmeans_centroids[2][0], 'colorset_3_g':self.kmeans_centroids[2][0], 'colorset_3_b':self.kmeans_centroids[2][0], 
+								'red_range_l':self.red_range[0], 'red_range_h':self.red_range[1], 'green_range_l':self.green_range[0], 'green_range_h':self.green_range[1], 
+								'blue_range_l':self.blue_range[0], 'blue_range_h':self.blue_range[1]}),
+				
 if __name__ == '__main__':
 	arguments = docopt(__doc__)
 	input_filepath = os.path.dirname(arguments['<input_image>'])
@@ -415,21 +471,23 @@ if __name__ == '__main__':
 	if verbose:
 		print(arguments)
 
-	colorset_test = ColorSet(arguments['<input_image>'], verbose)
-	colorset_test.save_images(output_path)
-	
-	#######Results
-
-	# if arguments['-d']:
-	# 	dbPath = arguments['<dbPath>']
-	# 	append_database(colorset_test.get_kmeans_centroids(), input_filename, dbPath)
-	# else:
-	# 	append_database(colorset_test.get_kmeans_centroids(), input_filename)
-
-
 	color_balancing_test = ColorBalancing(arguments['<input_image>'], verbose)
-	#color_balancing_test.show_images()
-	print "output path {}".format(output_path)
+
+	#######Results
+	if arguments['--database']:
+		print "Pointing to Custom DB"
+		dbPath = arguments['--database']
+	else:
+		dbPath="./../../database/learningDB.csv"
+
+	if arguments['-l']:
+		print "Adding to Learning DB"
+		if color_balancing_test.get_JSON_values():
+			print "Number of Likes {}".format(color_balancing_test.likes)
+			color_balancing_test.append_database(dbPath)
 	color_balancing_test.save_images(output_path)
 	color_balancing_test.save_histograms(output_path)
+
+	#color_balancing_test.show_images()
+	print "output path {}".format(output_path)
 
