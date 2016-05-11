@@ -365,7 +365,7 @@ class ColorBalancing(ColorSet):
 		if popularity:
 			histogramtitle = "Popularity Weighted Data " + histogramtitle			
 		if red:
-			output_filename = self.filename
+			output_filename = os.path.splitext(self.filename)[0] + ".png"
 			plt.figure()
 			plt.title(histogramtitle)
 			plt.hist(redList, bins, color = 'pink', histtype='step')
@@ -374,7 +374,7 @@ class ColorBalancing(ColorSet):
 			plt.savefig(output_path + output_filename, bbox_inches = 'tight')
 			plt.close()
 		if green:
-			output_filename = self.filename
+			output_filename = os.path.splitext(self.filename)[0] + ".png"
 			plt.figure()
 			plt.title(histogramtitle)
 			plt.hist(greenList, bins, color = 'lightgreen', histtype='step')
@@ -383,7 +383,7 @@ class ColorBalancing(ColorSet):
 			plt.savefig(output_path + output_filename, bbox_inches = 'tight')
 			plt.close()
 		if blue:
-			output_filename = self.filename
+			output_filename = os.path.splitext(self.filename)[0] + ".png"
 			plt.figure()
 			plt.title(histogramtitle)
 			plt.hist(blueList, bins, color = 'lightblue', histtype='step')
