@@ -89,7 +89,7 @@ app.get('/upload/cb/:tn', function (req, res) {
 app.get('/upload/rhisto/:tn', function (req, res) {
   var tn = req.params.tn;
   var fs = require('fs');
-  fs.readFile('./public/algo_out/'+tn+'-r-histo.png', function(err, data) {
+  fs.readFile('./public/output/'+tn+'/histogram_scaled_color_balanced_list1[(255, 255, 255), (0, 0, 0)]red_'+tn+'.png', function(err, data) {
       res.writeHead(200, {'Content-Type': 'image/jpeg'});
       res.end(data); // Send the file data to the browser.
     console.log('file opened by controller!');
@@ -99,7 +99,7 @@ app.get('/upload/rhisto/:tn', function (req, res) {
 app.get('/upload/ghisto/:tn', function (req, res) {
   var tn = req.params.tn;
   var fs = require('fs');
-  fs.readFile('./public/algo_out/'+tn+'-g-histo.png', function(err, data) {
+  fs.readFile('./public/output/'+tn+'/histogram_scaled_color_balanced_list1[(255, 255, 255), (0, 0, 0)]green_'+tn+'.png', function(err, data) {
       res.writeHead(200, {'Content-Type': 'image/jpeg'});
       res.end(data); // Send the file data to the browser.
     console.log('file opened by controller!');
@@ -109,7 +109,7 @@ app.get('/upload/ghisto/:tn', function (req, res) {
 app.get('/upload/bhisto/:tn', function (req, res) {
   var tn = req.params.tn;
   var fs = require('fs');
-  fs.readFile('./public/algo_out/'+tn+'-b-histo.png', function(err, data) {
+  fs.readFile('./public/output/'+tn+'/histogram_scaled_color_balanced_list1[(255, 255, 255), (0, 0, 0)]blue_'+tn+'.png', function(err, data) {
       res.writeHead(200, {'Content-Type': 'image/jpeg'});
       res.end(data); // Send the file data to the browser.
     console.log('file opened by controller!');
