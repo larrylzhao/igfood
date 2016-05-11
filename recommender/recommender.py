@@ -68,15 +68,38 @@ class Recommender:
 
         print similarity_results.head(10).ix[:10]
 
+    def item2item_cosine_filtering_ranges(self):
+        temp_dataset = self.dataset.drop(['in_filename', 'colorset_1_r', 'colorset_1_g', 'colorset_1_b', 
+                                            'colorset_2_r', 'colorset_2_g', 'colorset_2_b', 
+                                            'colorset_3_r', 'colorset_3_g', 'colorset_3_b'], 1) 
+        storage_results = pandas.DataFrame(index=temp_dataset.columns, columns=temp_dataset.columns)
+        for col_counter in range(0, len(storage_results.columns)):
+            for counter in range(0, len(storage_results.columns)):
+                storage_results.ix[col_counter, counter] = 1 - cosine(temp_dataset.ix[:,col_counter], temp_dataset.ix[:,counter])
 
+        similarity_results = pandas.DataFrame(index=storage_results.columns, columns=range(0,5))
+
+        for x in range(0, len(storage_results.columns)):
+            similarity_results.ix[x,:5] = storage_results.ix[0:,x].order(ascending=False)[:5].index
+
+        print similarity_results.head(5).ix[:5]
+
+    def euclidean_recommender(self):
+        """Realtive Distances"""
+        print self.dataset.corr()['likes']
 
     def cluster_wholeset(self):
         #Should we move this?
-        print "Pixel Clustering Based Off DB at {}".format(self.dbpath)
+        print "Pixel Clustering Based Off Kmeans with Likes {}".format(self.dbpath)
         #print self.reader_to_list(reader)
         #for row in self.LearningDict:
         #    print row
         #print self.LearningDict
+        temp_dataset = self.dataset.drop(['in_filename', 'colorset_1_r', 'colorset_1_g', 'colorset_1_b', 
+                                            'colorset_2_r', 'colorset_2_g', 'colorset_2_b', 
+                                            'colorset_3_r', 'colorset_3_g', 'colorset_3_b'])
+        whitened = whiten(self.dataset['likes',])
+        centroids = kmeans(whitened,15)[0] * std(pix_array, 0)
 
     def reader_to_list(self, reader):
         temp_list = []
@@ -84,6 +107,20 @@ class Recommender:
             #print "Reader to List {}".format(row)
             temp_list.append(row)
         return temp_list
+
+    def range_to_likes(self):
+        print self.dataset['red_range_l'] > .01
+
+        temp_dataset = self.dataset
+        temp_dataset = temp_dataset[temp_dataset['red_range_l']>.01]
+        temp_dataset = temp_dataset[temp_dataset['red_range_h]'<.99]
+        temp_dataset = temp_dataset[temp_dataset['green_range_l']>.01]
+        temp_dataset = temp_dataset[temp_dataset['green_range_h']<.99]
+        temp_dataset = temp_dataset[temp_dataset['blue_range_l']>.01]
+        temp_dataset = temp_dataset[temp_dataset['blue_range_l']<.001]
+
+        #for x in range(0, self.dataset.size() ):
+        #    print "Range 2 Likes \n{}".format(self.dataset.ix[x])
 
     # def fetch_data(self):
     #     print "Fetching Values Stored in DB for Specific {}".format(self.image_under_test)
@@ -111,6 +148,11 @@ if __name__ == '__main__':
     recommendation = Recommender(dbpath)
     #print recommendation.dataset.head()
     recommendation.item2item_cosine_filtering()
-    recommendation.cluster_wholeset()
+    recommendation.item2item_cosine_filtering_ranges()
+    #recommendation.dataset.describe()
+    recommendation.dataset.corr()['likes']
+    #recommendation.cluster_wholeset()
+    recommendation.euclidean_recommender()
+    recommendation.range_to_likes()
 
 
