@@ -30,6 +30,7 @@ import os.path
 import random
 import json
 import pandas
+import matplotlib.pyplot as plt
 
 class Recommender:
     """Basic Recommender"""
@@ -95,11 +96,18 @@ class Recommender:
         #for row in self.LearningDict:
         #    print row
         #print self.LearningDict
+        print self.dataset
         temp_dataset = self.dataset.drop(['in_filename', 'colorset_1_r', 'colorset_1_g', 'colorset_1_b', 
                                             'colorset_2_r', 'colorset_2_g', 'colorset_2_b', 
-                                            'colorset_3_r', 'colorset_3_g', 'colorset_3_b'])
-        whitened = whiten(self.dataset['likes',])
-        centroids = kmeans(whitened,15)[0] * std(pix_array, 0)
+                                            'colorset_3_r', 'colorset_3_g', 'colorset_3_b'],1)
+        whitened = whiten(temp_dataset)
+        centroids = kmeans(whitened,3)[0][1] * std(temp_dataset, 0)
+        rounded_centroid = []
+        for colors in centroids:
+            rounded_color = [int(round(band_value)) for band_value in colors ]
+            rounded_centroid.append(rounded_color)
+        print "Rounded Centroids at \n{0}".format(rounded_centroid)
+        return rounded_centroid
 
     def reader_to_list(self, reader):
         temp_list = []
@@ -112,12 +120,8 @@ class Recommender:
         print self.dataset['red_range_l'] > .01
 
         temp_dataset = self.dataset
-        temp_dataset = temp_dataset[temp_dataset['red_range_l']>.01]
-        temp_dataset = temp_dataset[temp_dataset['red_range_h]'<.99]
-        temp_dataset = temp_dataset[temp_dataset['green_range_l']>.01]
-        temp_dataset = temp_dataset[temp_dataset['green_range_h']<.99]
-        temp_dataset = temp_dataset[temp_dataset['blue_range_l']>.01]
-        temp_dataset = temp_dataset[temp_dataset['blue_range_l']<.001]
+        #model = pandas.ols(y=temp_dataset['red_range_l'], x=temp_dataset.ix[:,['likes']])
+        #print model
 
         #for x in range(0, self.dataset.size() ):
         #    print "Range 2 Likes \n{}".format(self.dataset.ix[x])
@@ -138,6 +142,34 @@ class Recommender:
     #         self.push_data()
     #         raise
 
+    def plotHistogram_likes(self, data_array, histogramtitle="Histogram", bins=255):
+        #numpy.histogram(input_array, bins)
+        plt.figure()
+        plt.hist(data_array*self.dataset['likes'], bins)
+        plt.title(histogramtitle)
+        plt.show()
+
+    def plotHistogram(self, data_array, histogramtitle="Histogram", bins=255):
+        #numpy.histogram(input_array, bins)
+        plt.figure()
+        plt.hist(data_array*self.dataset['likes'], bins)
+        plt.title(histogramtitle)
+        plt.show()
+
+    def plotHistograms(self):
+        self.plotHistogram_likes(self.dataset['red_range_l'], "red_range_l_scaled_likes", 50)
+        self.plotHistogram_likes(self.dataset['red_range_h'], "red_range_h_scaled_likes", 50)
+        self.plotHistogram_likes(self.dataset['green_range_l'], "green_range_l_scaled_likes", 50)
+        self.plotHistogram_likes(self.dataset['green_range_h'], "green_range_h_scaled_likes", 50)
+        self.plotHistogram_likes(self.dataset['blue_range_l'], "blue_range_l_scaled_likes", 50)
+        self.plotHistogram_likes(self.dataset['blue_range_h'], "blue_range_l_scaled_likes", 50)
+
+        self.plotHistogram(self.dataset['red_range_l'], "red_range_l_scaled_", 50)
+        self.plotHistogram(self.dataset['red_range_h'], "red_range_h_scaled_", 50)
+        self.plotHistogram(self.dataset['green_range_l'], "green_range_l_scaled", 50)
+        self.plotHistogram(self.dataset['green_range_h'], "green_range_h_scaled", 50)
+        self.plotHistogram(self.dataset['blue_range_l'], "blue_range_l_scaled", 50)
+        self.plotHistogram(self.dataset['blue_range_h'], "blue_range_l_scaled", 50)
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
@@ -154,5 +186,6 @@ if __name__ == '__main__':
     #recommendation.cluster_wholeset()
     recommendation.euclidean_recommender()
     recommendation.range_to_likes()
+    recommendation.plotHistograms()
 
 

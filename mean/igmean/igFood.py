@@ -485,6 +485,9 @@ if __name__ == '__main__':
 		if color_balancing_test.get_JSON_values():
 			print "Number of Likes {}".format(color_balancing_test.likes)
 			color_balancing_test.append_database(dbPath)
+
+	color_balancing_test.show_images()
+	
 	color_balancing_test.save_images(output_path)
 	color_balancing_test.save_histograms(output_path)
 
