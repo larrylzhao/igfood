@@ -13,7 +13,7 @@ foreach my $line (@fArr) {
 	if ($line =~ m/lowres":"(.+)"/) {
 		$lowres = $1;
 	}
-	if ($line =~ m/link":"(\d+)/) {
+	if ($line =~ m/link":"([^"]+)/) {
 		$link = $1;
 	}
 	print OUT "$likes\t$lowres\t$link\n";
