@@ -31,7 +31,7 @@ def image2_flat_array(pix, im):
 	Output: Flat Numpy Array
 	This function needs to be changed to not be flat. 
 	Keeping it around for Legacy calls that I haven't fixed yet"""
-	print "Image Dimensions {0}".format(im.size)
+	#print "Image Dimensions {0}".format(im.size)
 	temp_list = []
 	for x in range (0,im.size[0]):
 		for y in range (0,im.size[1]):
@@ -39,6 +39,16 @@ def image2_flat_array(pix, im):
 	pix_array = array(temp_list)
 	#print "Picture Access Object converted to RGB numpy Array \n{0}".format(pix_array)
 	return pix_array
+
+def image2_list(pix, im):
+		#Input: Pixel Array object, Output: numpy Array
+		print "Image Dimensions {0}".format(im.size)
+		temp_list = []
+		for x in range (0,im.size[0]):
+	 		for y in range (0,im.size[1]):
+	 			temp_list.append(pix[x,y][0:3])
+	 	#print "Picture Access Object converted to RGB list \n{0}".format(pix_array)
+	 	return temp_list
 
 def check_duplicate(dbPath, in_filename):
 	"""check for duplicates in database"""
@@ -76,7 +86,7 @@ class igFood(object):
 	def __init__(self, filepath = "test.png", verbose = False):
 		self.filepath = filepath
 		self.filename = ntpath.basename(filepath)
-		self.im = Image.open(filepath)
+		self.im = Image.open(filepath).convert('RGB')
 		self.pix = self.im.load()
 		self.pix_array = image2_flat_array(self.pix, self.im)
 		self.pix_asarray = numpy.asarray(self.im)
@@ -165,8 +175,23 @@ class ColorBalancing(ColorSet):
 		self.unscaled_distributed_array = self.rescale_array(self.color_balanced_array, [self.red_range,
 												self.green_range, self.blue_range])
 		self.scaled_color_balanced_array = (self.unscaled_distributed_array.copy() * normalization_range[1]).astype('uint8')
+		
 		self.color_balanced_im = Image.fromarray(self.color_balanced_array)
 		self.scaled_color_balanced_im = Image.fromarray(self.scaled_color_balanced_array)
+		
+		self.pix_list = image2_list(self.pix, self.im)
+		self.color_balanced_list = image2_list(self.color_balanced_im.load(), self.color_balanced_im)
+		self.scaled_color_balanced_list = image2_list(self.scaled_color_balanced_im.load(), self.scaled_color_balanced_im)
+
+	def get_scaled_colorbalanced_list(self):
+		print self.scaled_color_balanced_list
+
+	def save_histograms(self, output_path):
+		"""Saves Histograms to output_path
+		TBD - Move Save Function here, and restore Plot function in plot_RGB_histogram"""
+		#self.color_balanced_histogram = self.plot_RGB_histogram(self.pix_list, self.color_balanced_list, output_path, "color_balanced_list")
+		self.scaled_color_balanced_histogram = self.plot_RGB_histogram(self.pix_list, self.scaled_color_balanced_list, output_path, "scaled_color_balanced_list")
+
 
 	def rescale_array(self, input_array, color_range = ((0, 255), (0, 255), (0, 255)), normalization_range = ((0, 255), (0, 255), (0, 255))):
 		"""normalize_PIL_array / Scale Array to fit Range
@@ -301,6 +326,74 @@ class ColorBalancing(ColorSet):
 		#print output_array
 		return output_array
 
+	def plot_RGB_histogram(self, original_pix_list, new_pix_list, output_path, name_of_list, 
+							red=True, green=True , blue=True, histogramtitle="RGB Histogram of Overall Dataset", popularity=False, bins=255):
+		"""UGLY - To be repaired later from before we started using numpy arrays properly"""
+		redList=[]
+		greenList=[]
+		blueList=[]
+		n=0
+		for row in original_pix_list:
+			#print "row[{}] {}".format(n,row)
+			n+=1
+			tempList=row
+			#print "tempList {}".format(tempList)
+			intsonly = re.compile('\d+(?:\.\d+)?')
+			#print int(intsonly.findall(tempList[1])[0])
+			#print tempList
+			redList.append((tempList[0]))
+			greenList.append((tempList[1]))
+			blueList.append((tempList[2]))
+		plt.figure()
+
+		redList_2 = []
+		greenList_2 = []
+		blueList_2 = []
+		n=0
+		
+		for row in new_pix_list:
+			#print "row[{}] {}".format(n,row)
+			n+=1
+			tempList=row
+			#print "tempList {}".format(tempList)
+			intsonly = re.compile('\d+(?:\.\d+)?')
+			#print int(intsonly.findall(tempList[1])[0])
+			#print tempList
+			redList_2.append((tempList[0]))
+			greenList_2.append((tempList[1]))
+			blueList_2.append((tempList[2]))
+		if popularity:
+			histogramtitle = "Popularity Weighted Data " + histogramtitle			
+		if red:
+			output_filename = self.filename
+			plt.figure()
+			plt.title(histogramtitle)
+			plt.hist(redList, bins, color = 'pink', histtype='step')
+			plt.hist(redList_2, bins, color = 'red', histtype='step')
+			output_filename = "histogram_" + name_of_list + str(self.saturation_level) + str(self.balance_colors) + "red_" + output_filename
+			plt.savefig(output_path + output_filename, bbox_inches = 'tight')
+			plt.close()
+		if green:
+			output_filename = self.filename
+			plt.figure()
+			plt.title(histogramtitle)
+			plt.hist(greenList, bins, color = 'lightgreen', histtype='step')
+			plt.hist(greenList_2, bins , color = 'green', histtype='step')
+			output_filename = "histogram_" + name_of_list + str(self.saturation_level) + str(self.balance_colors) + "green_" + output_filename
+			plt.savefig(output_path + output_filename, bbox_inches = 'tight')
+			plt.close()
+		if blue:
+			output_filename = self.filename
+			plt.figure()
+			plt.title(histogramtitle)
+			plt.hist(blueList, bins, color = 'lightblue', histtype='step')
+			plt.hist(blueList_2, bins, color = 'blue', histtype='step')
+			output_filename = "histogram_" + name_of_list + str(self.saturation_level) + str(self.balance_colors) + "blue_" + output_filename
+			plt.savefig(output_path + output_filename, bbox_inches = 'tight')
+			plt.close()
+
+		#plt.show()
+
 if __name__ == '__main__':
 	arguments = docopt(__doc__)
 	input_filepath = os.path.dirname(arguments['<input_image>'])
@@ -338,4 +431,5 @@ if __name__ == '__main__':
 	#color_balancing_test.show_images()
 	print "output path {}".format(output_path)
 	color_balancing_test.save_images(output_path)
+	color_balancing_test.save_histograms(output_path)
 
