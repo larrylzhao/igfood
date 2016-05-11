@@ -23,39 +23,60 @@ from docopt import docopt
 from PIL import Image, ImageDraw
 from numpy import array, std, matrix
 from scipy.cluster.vq import vq, kmeans, whiten
+from scipy.spatial.distance import cosine
 import csv
 import ntpath
 import os.path
 import random
-import database_manipulation
+import json
+import pandas
 
 class Recommender:
     """Basic Recommender"""
 
-    def __init__(self, image_under_test="test.png", dbpath="colorsetDB.csv"):
-        self.image_under_test = image_under_test
+    def __init__(self, dbpath="test.csv"):
         self.dbpath = dbpath
-        self.reader = None
-        self.reloadreader()
-        self.testList = None
+        self.LearningDict = self.reloadreader()
+        self.dataset = pandas.read_csv(dbpath)
 
     def reloadreader(self):
         if os.path.isfile(dbpath):
-            csvfile = open(self.dbpath, 'r')
-            try:
-                reader = csv.reader(csvfile)
+            with open(self.dbpath, 'r') as csvfile:
                 print "DB Exists and Loaded CSV Format DB Into a Reader Object at self.reader for {}".format(self)
-                return reader
-            except:
-                print "No DB to Load"
-                raise
+                reader = (csv.DictReader(csvfile))
+                outputDict = list(csv.DictReader(csvfile))
+                #for row in reader:
+                #    print row
+                return outputDict
+        else:
+            print "No DB to Load"
+            raise
+
+    def item2item_cosine_filtering(self):
+        """cosine similarity filter thru colorset + likes
+        """
+        temp_dataset = self.dataset.drop(['in_filename', 'red_range_l', 'red_range_h', 'green_range_l', 'green_range_h', 'blue_range_l', 'blue_range_h'], 1) 
+        storage_results = pandas.DataFrame(index=temp_dataset.columns, columns=temp_dataset.columns)
+        for col_counter in range(0, len(storage_results.columns)):
+            for counter in range(0, len(storage_results.columns)):
+                storage_results.ix[col_counter, counter] = 1 - cosine(temp_dataset.ix[:,col_counter], temp_dataset.ix[:,counter])
+
+        similarity_results = pandas.DataFrame(index=storage_results.columns, columns=range(0,10))
+
+        for x in range(0, len(storage_results.columns)):
+            similarity_results.ix[x,:10] = storage_results.ix[0:,x].order(ascending=False)[:10].index
+
+        print similarity_results.head(10).ix[:10]
+
+
 
     def cluster_wholeset(self):
         #Should we move this?
-        reader=self.reloadreader()
         print "Pixel Clustering Based Off DB at {}".format(self.dbpath)
         #print self.reader_to_list(reader)
-        print array(self.reader_to_list(reader))
+        #for row in self.LearningDict:
+        #    print row
+        #print self.LearningDict
 
     def reader_to_list(self, reader):
         temp_list = []
@@ -64,66 +85,32 @@ class Recommender:
             temp_list.append(row)
         return temp_list
 
-    def fetch_data(self):
-        print "Fetching Values Stored in DB for Specific {}".format(self.image_under_test)
-        reader = self.reloadreader()
-        found = False
-        for row in reader:
-            if self.image_under_test in row : 
-                print "Found Image {} in DB".format(self.image_under_test)
-                print row
-                found = True
-                return row
-        if found:
-            #TODO - Call Colorset.py or Import the Library at this point
-            print "Push Colorset Value to the Database First"
-            self.push_data()
-            raise
+    # def fetch_data(self):
+    #     print "Fetching Values Stored in DB for Specific {}".format(self.image_under_test)
+    #     reader = self.reloadreader()
+    #     found = False
+    #     for row in reader:
+    #         if self.image_under_test in row : 
+    #             print "Found Image {} in DB".format(self.image_under_test)
+    #             print row
+    #             found = True
+    #             return row
+    #     if found:
+    #         #TODO - Call Colorset.py or Import the Library at this point
+    #         print "Push Colorset Value to the Database First"
+    #         self.push_data()
+    #         raise
 
-    def push_data(self):
-        print "Pushing Values Stored in DB for Item {}".format(self.image_under_test)
-        print "STILL IN DEVELOPMENT"
-        #TODO Make a CSV Writer Object at this point and push the data in Probably better in a different python file.
-        return True
-
-#class ItemToItemFiltering(Recommender):
-#    def 
-
-def openImage(filename="test.png", verbose=False):
-    im = Image.open(filename)
-    print "Loading Image {0} ".format(filename)
-    if verbose:
-        im.show()
-    return im
-
-def appendDatabase(colorset, in_filename="test.png", dbPath="./../database/colorsetDB.csv"):
-    dataset = colorset
-    ##TODO : Check Duplicate
-    #add checkDuplicate(dbPath, in_filename) to if statement        
-    if os.path.isfile(dbPath):
-        print "Appending to database at {}".format(dbPath)
-        with open(dbPath, 'a') as databasefile:
-            fields=['in_filename', 'colorset_1', 'colorset_2', 'colorset_3']
-            writer = csv.DictWriter(databasefile,fieldnames=fields)
-            writer.writerow({'in_filename':in_filename, 'colorset_1': dataset[0], 'colorset_2':dataset[1], 'colorset_3':dataset[2]})
-    else:
-        print "Database does not exist, creating file at {}".format(dbPath)
-        with open(dbPath, 'w') as databasefile:
-            print "Appending value to database at {0}".format(dbPath)
-            fields=['in_filename', 'colorset_1', 'colorset_2', 'colorset_3']
-            writer = csv.DictWriter(databasefile,fieldnames=fields)
-            writer.writeheader()
-            writer.writerow({'in_filename':in_filename, 'colorset_1': dataset[0], 'colorset_2':dataset[1], 'colorset_3':dataset[2]})
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     print(arguments)
     image_under_test = arguments['<image_under_test>']
-    dbpath = arguments['--dbpath'] or 'colorsetDB.csv'
+    dbpath = arguments['--dbpath'] or 'test.csv'
 
-    recommendation = Recommender(image_under_test, dbpath)
-    recommendation.fetch_data()
+    recommendation = Recommender(dbpath)
+    #print recommendation.dataset.head()
+    recommendation.item2item_cosine_filtering()
     recommendation.cluster_wholeset()
 
-    print "Recommendation Input {} and Dataset/DBPath {}".format(recommendation.image_under_test, recommendation.dbpath)
 
